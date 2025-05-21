@@ -105,7 +105,7 @@ def evaluate_model(y_test, predictions, model_name):
     r2 = r2_score(y_test, predictions)
     return {"Model": model_name, "MAE": mae, "MSE": mse, "RMSE": rmse, "R2": r2}
 
-# 以LightGBM为例，使用随机搜索寻找最优超参数
+# Take LightGBM as an example, using random search to find the optimal hyperparameters
 param_dist = {
     'n_estimators': randint(100, 1000),
     'max_depth': randint(3, 20),
@@ -122,10 +122,10 @@ param_dist = {
     'boosting_type': ['gbdt', 'dart', 'goss']
 }
 
-# 初始化 LightGBM 回归模型
+# Initialize the LightGBM regression model
 lgb_reg = LGBMRegressor(random_state=0, verbose=-1)
 
-# 使用随机搜索法进行超参数调整
+# Use the random search method for hyperparameter adjustment
 random_search = RandomizedSearchCV(
     estimator=lgb_reg,
     param_distributions=param_dist,
@@ -136,13 +136,13 @@ random_search = RandomizedSearchCV(
     n_jobs=-1
 )
 
-# 拟合数据
+# Fitting data
 random_search.fit(X_train, y_train)
 
-# 输出最佳超参数组合
+# Output the optimal combination of hyperparameters
 print(f"Best parameters found: {random_search.best_params_}")
 
-# 使用最佳参数的模型进行预测
+# Make predictions using the model with the optimal parameters
 best_lgb_reg = random_search.best_estimator_
 lgb_predictions = best_lgb_reg.predict(X_test)
 lgb_mae = mean_absolute_error(y_test, lgb_predictions)
