@@ -10,6 +10,8 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.svm import SVR
 from scipy.stats import uniform, randint
 from sklearn.metrics import mean_absolute_error, mean_squared_error, root_mean_squared_error, r2_score
+import matplotlib.pyplot as plt
+import shap
 
 # Read the Excel file, the 1F throat swab cohort was used as an example
 df = pd.read_excel('1F咽拭子.xlsx')
@@ -24,11 +26,17 @@ df_rd['采样时间'] = pd.to_datetime(df_rd['采样时间'])
 # Sort the Excel file in chronological order
 df_rd_rank = df_rd.sort_values(by='分诊签到时间', ascending=True)
 
+# Calculate the waiting time, and count by minutes. If it is a radiology examination, replace "分诊签到时间" with "签到/登记时间"，replace "采样时间" with "上机检查时间"
+df_rd_rank['waiting time'] = (df_rd_rank['采样时间'] - df_rd_rank['分诊签到时间']).dt.total_seconds() / 60
+
+# Exclude the rows where the "waiting time" is negative
+df_rd_rank = df_rd_rank[df_rd['waiting time'] >= 0]
+
 # Extract the month, day and time information and add it to a new column
-df_rd_rank['month'] = df_rd_rank[time_column].dt.month
-df_rd_rank['day'] = df_rd_rank[time_column].dt.day
-df_rd_rank['hour'] = df_rd_rank[time_column].dt.hour
-df_rd_rank['week'] = df_rd_rank[time_column].dt.weekday
+df_rd_rank['month'] = df_rd_rank['分诊签到时间'].dt.month
+df_rd_rank['day'] = df_rd_rank['分诊签到时间'].dt.day
+df_rd_rank['hour'] = df_rd_rank['分诊签到时间'].dt.hour
+df_rd_rank['week'] = df_rd_rank['分诊签到时间'].dt.weekday
 
 # Count the arrival rate, based on "month", "day" and "hour"
 grouped = df_rd_rank.groupby(['month', 'day', 'hour']).size().reset_index(name='arrival rate')
@@ -40,9 +48,16 @@ for i in range(len(df_rd_rank)):
     count = (df_rd_rank.loc[start_index:i-1, '采样时间'] > current_sign_in_time).sum()
     df_rd_rank.loc[i, 'the number of queuing patient'] = count
 
+# Remove noise record
+q25 = df_rd_rank['waiting time'].quantile(0.25)
+q75 = df_rd_rank['waiting time'].quantile(0.75)
+iqr = q75 - q25
+noise_threshold = q75 + 1.5 * iqr
+df_rd_rank_denosie = df_rd_rank[df_rd_rank['waiting time'] <= noise_threshold]
+
 # Data preprocessing
-y = df["waiting time"]
-X = df[["month", "day", "hour", "week", "the number of queuing patient", "arrival rate"]]
+y = df_rd_rank_denosie["waiting time"]
+X = df_rd_rank_denosie[["month", "day", "hour", "week", "the number of queuing patient", "arrival rate"]]
 
 # dataset spliting
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=0)
@@ -153,3 +168,9 @@ print(f"Mean Absolute Error (MAE): {lgb_mae}")
 print(f"Mean Squared Error (MSE): {lgb_mse}")
 print(f"Root Mean Squared Error (MAE): {lgb_rmse}")
 print(f"R² Score: {lgb_r2}")
+
+# Draw the SHAP plot
+explainer = shap.Explainer(best_lgb_reg)
+shap_values = explainer(X_test)
+shap.summary_plot(shap_values, X_test)
+plt.show()
