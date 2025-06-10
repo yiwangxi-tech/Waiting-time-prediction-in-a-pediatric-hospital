@@ -10,7 +10,7 @@ from lightgbm import LGBMRegressor
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.neighbors import KNeighborsRegressor
 
-# 模型配置
+# Model configuration
 model_configs = {
     "超声-急诊": ("RandomForest", {'n_estimators': 357, 'max_depth': 14, 'min_samples_leaf': 1, 'max_features': 0.4021767833180502, 'bootstrap': True}),
     "心功能室-门诊": ("RandomForest", {'n_estimators': 106, 'max_depth': 10, 'min_samples_leaf': 4, 'max_features': 0.31154400313415803, 'bootstrap': False}),
@@ -30,7 +30,7 @@ model_configs = {
 feature_cols = ["Month", "Day", "Hour", "the day of week", "the number of queuing patient", "Arrival rate"]
 target_col = "Queuing time"
 
-# 你的 Excel 文件夹路径
+# Data loading
 data_folder = "/home/pumc/tangrui_zy/tfenv/WT prediction"
 file_list = [f for f in os.listdir(data_folder) if f.endswith('.xlsx')]
 
@@ -46,7 +46,7 @@ for file_name in file_list:
             print(f"⚠️ 数据过少，跳过文件：{file_name}")
             continue
 
-        # 匹配模型
+        # Model match
         model_name, params = None, None
         for key in model_configs:
             if key in file_name:
@@ -56,7 +56,7 @@ for file_name in file_list:
             print(f"⚠️ 未匹配模型: {file_name}")
             continue
 
-        # 初始化模型
+        # Model initialization
         if model_name == "RandomForest":
             model = RandomForestRegressor(**params, n_jobs=-1, random_state=42)
         elif model_name == "SVR":
@@ -75,7 +75,7 @@ for file_name in file_list:
 
         model.fit(X, y)
 
-        # 定义采样策略
+        # Sampling strategy defination
         sample_sizes = [500, 1000, 2000] if len(X) >= 500 else [len(X)]
 
         print(f"\n📄 {file_name} | 模型: {model_name} | 总数据量: {len(X)}")
