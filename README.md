@@ -3,7 +3,7 @@ This is a real-world study on predicting the wait time for pediatric patients be
 # Background
 The shortage of pediatric medical resources and overcrowding in children’s hospital are severe issues in China. Queue management systems that accurately predict waiting times could help optimize hospital operational efficiency.
 # Citing
-If you use this deep learning model or the code in your research, please cite the original article:
+If you use this machine learning model or the code in your research, please cite the original article:
 <br>• Predicting Medical Task Waiting Times in a Pediatric Hospital by Machine Learning: A Comprehensive Real-World Study
 
 # Contact
