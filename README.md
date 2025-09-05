@@ -9,4 +9,4 @@ If you use this machine learning model or the code in your research, please cite
 # Contact
 For any inquiries or assistance, please contact the corresponding authors:
      
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Rui Tang (b2024011001@student.pumc.edu.cn)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;• Rui Tang (442359065@qq.com)
